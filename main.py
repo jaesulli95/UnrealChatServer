@@ -5,15 +5,22 @@ sio =socketio.AsyncServer()
 app = aiohttp.web.Application()
 sio.attach(app)
 
-@sio.event
+clients = []
+
+@sio.on('connect')
 def connect(sid, socket):
-    print('User Connected')
+    print('Client connected', sid)
+    clients.append(sid)
+
+@sio.on('disconnect')
+def disconnect(sid, socket):
+    print('Client disconnected', sid)
+    clients.remove(sid)
 
 @sio.event
-def disconnect(sid, socket):
-    print('User Disconnected')
-
-
+async def on_message(sid, data):
+    print(data['message'])
+    await sio.emit('OnMessageReceived', data['message'], to=[sid])
 
 if __name__ == '__main__':
-    aiohttp.web.run_app(app, host="0.0.0.0", port=5275)
+    aiohttp.web.run_app(app, host="127.0.0.1", port=5275)
