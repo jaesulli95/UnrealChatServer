@@ -20,7 +20,7 @@ def disconnect(sid, socket):
 @sio.event
 async def on_message(sid, data):
     print(data['message'])
-    await sio.emit('OnMessageReceived', data['message'], to=[sid])
+    await sio.emit('OnMessageReceived', data['message'], to=sid)
 
 if __name__ == '__main__':
-    aiohttp.web.run_app(app, host="127.0.0.1", port=5275)
+    aiohttp.web.run_app(app, host="0.0.0.0", port=5275)
