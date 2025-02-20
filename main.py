@@ -1,5 +1,6 @@
-import aiohttp
+import Constants.EventNames as UCSEvents
 import socketio
+import aiohttp
 
 sio =socketio.AsyncServer()
 app = aiohttp.web.Application()
@@ -7,20 +8,18 @@ sio.attach(app)
 
 clients = []
 
-@sio.on('connect')
-def connect(sid, socket):
-    print('Client connected', sid)
+@sio.on(UCSEvents.CONNECT)
+async def connect(sid, socket):
+    await sio.emit(UCSEvents.CONNECT, {}, to=sid)
     clients.append(sid)
 
-@sio.on('disconnect')
+@sio.on(UCSEvents.DISCONNECT)
 def disconnect(sid, socket):
-    print('Client disconnected', sid)
     clients.remove(sid)
 
-@sio.event
+@sio.on(UCSEvents.ON_MESSAGE)
 async def on_message(sid, data):
-    print(data['message'])
-    await sio.emit('OnMessageReceived', data, to=sid)
+    await sio.emit(UCSEvents.ON_MESSAGE_RECEIVED, data, to=sid)
 
 if __name__ == '__main__':
     aiohttp.web.run_app(app, host="0.0.0.0", port=5275)
